@@ -1,0 +1,31 @@
+Mahasiswa {
+	_Nim
+	Name
+	Email
+	Major
+	Semester {
+		_Semester
+		_Nim
+		Subject {
+			_Subject_id 
+			_Semester_id
+			_Nim
+			Name
+			Sks
+			Grade	
+			Score {
+				_Score_id
+				_Subject_id
+				category
+			}
+			Teacher {
+				_Nip
+				_Subject_id
+				Name
+				Email
+				phone
+			}
+	    }
+    }
+}
+
