@@ -11,7 +11,10 @@ const teacherSchema = new mongoose.Schema({
         required: true,
         max: 15
     },
-    subject_id: requiredString, 
+    subject: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Subject'
+    }, 
     name: requiredString,
     email: requiredString,
     phone: {

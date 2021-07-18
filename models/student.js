@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 
-const Semester = require('./semester')
-
 const requiredString = {
     type: String,
     required: true
@@ -21,8 +19,12 @@ const studentSchema = new mongoose.Schema({
         max: 12
     },
     major: requiredString,
-    semester: [Semester]
-});
+    semester: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Semester'
+    },
+    
+}, { timestamp: true });
 
 const Student = mongoose.model('Student', studentSchema);
 module.exports = Student;

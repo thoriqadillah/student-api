@@ -3,11 +3,16 @@ const router = express.Router();
 
 const studentController = require("../controllers/studentController");
 
-router.route('/students')
-    .get(studentController.getAllStudent);
-    
+router.route('/')
+    .get(studentController.getAllStudent)
+    .post(studentController.addStudent);
 
-router.patch('/students/:nim');
-router.delete('/students/:nim');
+router.get('/:_id', studentController.getOneStudent)
+
+router.patch('/:_id', studentController.editStudent);
+
+router.delete('/:_id', studentController.deleteOneStudent);
+
+router.delete('/:_id', studentController.deleteAllStudent);
 
 module.exports = router;

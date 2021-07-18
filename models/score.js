@@ -6,7 +6,10 @@ const requiredString = {
 }
 
 const scoreSchema = new mongoose.Schema({
-    subject_id: requiredString,
+    subject: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Subject'
+    },
     category: requiredString
 });
 

@@ -10,13 +10,12 @@ const requiredString = {
 
 const subjectSchema = new mongoose.Schema({
     semester: {
-        type: Number,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Semester'
     },
-    nim: {
-        type: String,
-        required: true,
-        max: 15
+    student: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     name: requiredString,
     weight: {
@@ -27,8 +26,14 @@ const subjectSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    score: [Score],
-    teacher: [Teacher]
+    score: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Score'
+    },
+    teacher: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Teacher'
+    }
 });
 
 const Subject = mongoose.model('Subject', subjectSchema);
