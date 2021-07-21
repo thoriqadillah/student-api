@@ -7,12 +7,10 @@ router.route('/')
     .get(studentController.getAllStudent)
     .post(studentController.addStudent);
 
-router.get('/:_id', studentController.getOneStudent)
-
 router.patch('/:_id', studentController.editStudent);
 
 router.delete('/:_id', studentController.deleteOneStudent);
 
-router.delete('/:_id', studentController.deleteAllStudent);
+router.delete('/', studentController.deleteAllStudent);
 
 module.exports = router;

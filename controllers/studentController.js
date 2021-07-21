@@ -1,71 +1,87 @@
-const Student = require('../models/student');
+const Student = require('../models/studentModel');
+const Semester = require('../models/semesterModel');
 
 module.exports = {
 
     getAllStudent: (req, res) => {
-        Student.find({})
+        Student.find({}).populate('semester') //untuk join dengan collection semester
             .then(student => {
                 if (!student) {
                     res.status(404).json({
-                        message: "Student not found"
+                        status: "success",
+                        message: "There is no student data to be found"
                     });
                 } else {
-                    res.status(200).json(student);
+                    res.status(200).json({
+                        status: "success",
+                        student
+                    });
                 }
             })
             .catch(error => {
                 res.status(500).json({
-                    message: err.message || "Some error occurred while reading student data."
+                    status: "fail",
+                    message: error.message || "Some error occurred while reading student data."
                 });
             });
     },
-    
-    getOneStudent: (req, res) => {
-        const { _id } = req.params;
 
-        Student.find({ _id })
+    searchStudent: (req, res) => {
+        Student.find(req.body).populate('semester') //untuk join dengan collection semester
             .then(student => {
                 if (!student) {
                     res.status(404).json({
+                        status: "success",
                         message: "Student not found"
                     }); 
                 } else {
-                    res.status(200).json(student);
+                    res.status(200).json({
+                        status: "success",
+                        student
+                    });
                 }
             })
             .catch(error => {
                 res.status(500).json({
-                    message: "Error retrieving student with id = " + _id
+                    status: "fail",
+                    message: error.message || "Error retrieving student data"
                 });
             });
     },
 
     addStudent: (req, res) => {
-        const { nim, name, email, phone, major } = req.body;
+        const { nim, name, email, major, enterYear } = req.body;
 
-        if (!nim) return res.status(400).json({ message: "NIM is required!" });
-        if (!name) return res.status(400).json({ message: "Name is required!" });
-        if (!email) return res.status(400).json({ message: "Email is required!" });
-        if (!major) return res.status(400).json({ message: "Major is required!" });  
-
-        const student = new Student({
-            nim, name, email, phone, major
-        });
-
-        student.save(student)
-            .then(data => {
-                res.status(201).json(newStudent);
+        if (!nim) return res.status(400).json({ status: "fail", message: "NIM is required!" });
+        if (!name) return res.status(400).json({ status: "fail", message: "Name is required!" });
+        if (!email) return res.status(400).json({ status: "fail", message: "Email is required!" });
+        if (!major) return res.status(400).json({ status: "fail", message: "Major is required!" });  
+        if (!enterYear) return res.status(400).json({ status: "fail", message: "Enter year is required!" });  
+        
+        Student.create(req.body)
+            .then(student => {
+                res.status(201).json({
+                    status: "success",
+                    message: "Student was added successfully",
+                    student
+                });
             })
             .catch(error => {
                 res.status(500).json({
-                    message: err.message || "Some error occurred while adding Student."
+                    status: "fail",
+                    message: error.message || "Some error occurred while adding Student."
                 });
             });
+    },
+
+    assignSemesterToStudent: (req, res) => {
+        
     },
 
     editStudent: (req, res) => {
         if (!req.body) {
             return res.status(400).json({
+                status: "fail",
                 message: "Data to update can not be empty!"
             });
         }
@@ -76,15 +92,21 @@ module.exports = {
             .then(student => {
                 if (!student) {
                     res.status(404).json({
+                        status: "fail",
                         message: `Cannot update student with id ${_id}. Student was not found`
                     });
                 } else {
-                    res.json({ message: "Student data was updated successfully." });
+                    res.json({
+                        status: "success",
+                        message: "Student data was updated successfully",
+                        student
+                    });
                 }
             })
             .catch(error => {
                 res.status(500).json({
-                    message: err.message || "Some error occurred while updating student data."
+                    status: "fail",
+                    message: error.message || "Some error occurred while updating student data."
                 });
             });
     },
@@ -96,17 +118,20 @@ module.exports = {
             .then(student => {
                 if (!data) {
                     res.status(404).json({
+                        status: "fail",
                         message: `Cannot delete student with id = ${id}. Student was not found!`
                     });
                 } else {
                     res.json({
+                        status: "success",
                         message: "Student was deleted successfully!"
                     });
                 }
             })
             .catch(error => {
                 res.status(500).json({
-                    message: err.message || "Some error occurred while deleting student data."
+                    status: "fail",
+                    message: error.message || "Some error occurred while deleting student data."
                 });
             })
     },
@@ -114,14 +139,17 @@ module.exports = {
     deleteAllStudent: (req, res) => {
         Student.deleteMany({})
             .then(student => {
-                res.json({
+                res.status(200).json({
+                    status: "success",
                     message: `${student.deletedCount} students were deleted successfully!`
                 });
             })
             .catch(error => {
                 res.status(500).json({
+                    status: "fail",
                     message: error.message || "Some error occurred while deleting all Students."
                 });
             });
-    }
+    },
+
 }

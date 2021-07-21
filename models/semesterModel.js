@@ -3,16 +3,21 @@ const mongoose = require('mongoose');
 const semesterSchema = new mongoose.Schema({
     semester: {
         type: Number,
-        required: true
+        required: true,
+        index: true
     },
-    nim: {
+    year: {
+        type: String,
+        required: true  
+    },
+    student: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    },
-    subject: {
+    }],
+    course: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Subject'
-    }
+    }]
 });
 
 const Semester = mongoose.model('Semester', semesterSchema);

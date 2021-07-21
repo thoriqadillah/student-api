@@ -5,8 +5,8 @@ const requiredString = {
     required: true
 }
 
-const studentSchema = new mongoose.Schema({
-    nim: {
+const teacherSchema = new mongoose.Schema({
+    nip: {
         type: String,
         required: true,
         max: 15
@@ -18,14 +18,13 @@ const studentSchema = new mongoose.Schema({
         min: 11,
         max: 12
     },
-    major: requiredString,
-    semester: {
+    course: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Semester'
-    },
-    
-}, { timestamp: true });
+        ref: 'Subject'
+    }], 
+});
 
-const Student = mongoose.model('Student', studentSchema);
-module.exports = Student;
+teacherSchema.index({ nip: 1, name: 1, email: 1 });
 
+const Teacher = mongoose.model('Teacher', teacherSchema);
+module.exports = Teacher;
