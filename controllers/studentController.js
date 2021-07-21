@@ -96,7 +96,7 @@ module.exports = {
                         message: `Cannot update student with id ${_id}. Student was not found`
                     });
                 } else {
-                    res.json({
+                    res.status(200).json({
                         status: "success",
                         message: "Student data was updated successfully",
                         student
@@ -116,13 +116,13 @@ module.exports = {
 
         Student.findByIdAndDelete({ _id })
             .then(student => {
-                if (!data) {
+                if (!student) {
                     res.status(404).json({
                         status: "fail",
                         message: `Cannot delete student with id = ${id}. Student was not found!`
                     });
                 } else {
-                    res.json({
+                    res.status(200).json({
                         status: "success",
                         message: "Student was deleted successfully!"
                     });

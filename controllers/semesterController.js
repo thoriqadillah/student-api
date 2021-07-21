@@ -8,12 +8,12 @@ module.exports = {
         Semester.find({})
             .then(semester => {
                 if (!semester) {
-                    res.json({
+                    res.status(404).json({
                         status: "success",
                         message: "There is no semester data to be found",
                     })
                 } else {
-                    res.json({
+                    res.status(200).json({
                         status: "success",
                         semester
                     })
@@ -25,31 +25,6 @@ module.exports = {
                     message: error.message || "Some error occurred while reading semester data."
                 });
             })
-    },
-
-    getOneSemester: (req, res) => {
-        const { _id } = req.params;
-
-        Semester.findById({ _id })
-            .then(semester => {
-                if (!semester) {
-                    res.status(404).json({
-                        status: "success",
-                        message: "Semester data not found"
-                    }); 
-                } else {
-                    res.status(200).json({
-                        status: "success",
-                        semester
-                    });
-                }
-            })
-            .catch(error => {
-                res.status(500).json({
-                    status: "fail",
-                    message: error.message || "Error retrieving semester data with id = " + _id
-                });
-            });
     },
 
     searchSemester: (req, res) => {
@@ -101,6 +76,10 @@ module.exports = {
         
     },
 
+    assignCourseToSemester: async (req, res) => {
+        
+    },
+
     editSemester: (req, res) => {
         if (!req.body) {
             return res.status(400).json({
@@ -119,7 +98,7 @@ module.exports = {
                         message: `Cannot update semester with id ${_id}. Semester was not found`
                     });
                 } else {
-                    res.json({
+                    res.status(200).json({
                         status: "success",
                         message: "Student data was updated successfully",
                         student
@@ -145,7 +124,7 @@ module.exports = {
                         message: `Cannot delete semester data with id = ${id}. Semester data was not found!`
                     });
                 } else {
-                    res.json({
+                    res.status(200).json({
                         status: "success",
                         message: "Semester data was deleted successfully!"
                     });

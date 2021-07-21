@@ -14,8 +14,7 @@ const courseSchema = new mongoose.Schema({
         required: true
     },
     grade: {
-        type: Number,
-        required: true
+        type: String,
     },
     semester: [{
         type: mongoose.Schema.Types.ObjectId,
