@@ -6,18 +6,14 @@ const semesterSchema = new mongoose.Schema({
         required: true,
         index: true
     },
-    year: {
-        type: String,
-        required: true  
-    },
-    student: [{
+    student: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }],
-    course: [{
+    },
+    course: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Subject'
-    }]
+    }
 });
 
 const Semester = mongoose.model('Semester', semesterSchema);

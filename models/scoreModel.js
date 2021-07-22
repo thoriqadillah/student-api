@@ -6,10 +6,10 @@ const scoreSchema = new mongoose.Schema({
         required: true,
         index: true
     },
-    course: [{
+    course: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Subject'
-    }],
+    },
 });
 
 const Score = mongoose.model('Score', scoreSchema);

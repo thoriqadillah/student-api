@@ -6,9 +6,9 @@ module.exports = {
     getAllScore: (req, res) => {
         Score.find({})
             .then(score => {
-                if (!score) {
+                if (!score.length) { //jika data kosong
                     res.status(404).json({
-                        status: "success",
+                        status: "fail",
                         message: "There is no score data to be found",
                     })
                 } else {
@@ -27,11 +27,19 @@ module.exports = {
     },
 
     searchScore: (req, res) => {
+        //jika req.body kosong
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to insert can not be empty!"
+            });
+        }
+        
         Score.find(req.body)
             .then(score => {
-                if (!score) {
+                if (!score.length) { //jika data kosong
                     res.status(404).json({
-                        status: "success",
+                        status: "fail",
                         message: "Score data not found"
                     }); 
                 } else {
@@ -50,8 +58,17 @@ module.exports = {
     },
 
     addScore: (req, res) => {
-        const { category } = req.body;
+        //jika req.body kosong
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to insert can not be empty!"
+            });
+        }
 
+        const { category } = req.body;
+        
+        //jika salah satu filed pada req.body kosong
         if (!category) return res.status(400).json({ status: "fail", message: "Score category is required!" });
 
         Score.create(req.body)
@@ -70,32 +87,35 @@ module.exports = {
             })
     },
 
-    assignCourseToScore: (req, res) => {
+    assignNewCourseToScore: (req, res) => {
         
     },
 
     editScore: (req, res) => {
-        if (!req.body) {
+        //jika req.body kosong
+        if (Object.keys(req.body).length === 0) {
             return res.status(400).json({
                 status: "fail",
                 message: "Data to update can not be empty!"
             });
         }
-
+        
         const { _id } = req.params;
         
         Score.findByIdAndUpdate(_id, req.body, { useFindAndModify: false })
-            .then(score => {
-                if (!score) {
+            .then(async score => {
+                const updatedData = await Score.findById({ _id });
+
+                if (!score.length) { //jika data kosong
                     res.status(404).json({
                         status: "fail",
-                        message: `Cannot update score with id ${_id}. Score was not found`
+                        message: `Cannot update score data with id ${_id}. Score was not found`
                     });
                 } else {
                     res.status(200).json({
                         status: "success",
                         message: "Score data was updated successfully",
-                        score
+                        score: updatedData //tampilkan data yang sudah diupdate
                     });
                 }
             })
@@ -112,7 +132,7 @@ module.exports = {
 
         Score.findByIdAndDelete({ _id })
             .then(score => {
-                if (!score) {
+                if (!score.length) { //jika data kosong
                     res.status(404).json({
                         status: "fail",
                         message: `Cannot delete score data with id = ${id}. Score data was not found!`
@@ -132,19 +152,19 @@ module.exports = {
             })
     },
 
-    deleteAllScore: (req, res) => {
-        Score.deleteMany({})
-            .then(score => {
-                res.status(200).json({
-                    status: "success",
-                    message: `${score.deletedCount} scores were deleted successfully!`
-                });
-            })
-            .catch(error => {
-                res.status(500).json({
-                    status: "fail",
-                    message: error.message || "Some error occurred while deleting all scores data"
-                });
-            });
-    },
+    // deleteAllScore: (req, res) => {
+    //     Score.deleteMany({})
+    //         .then(score => {
+    //             res.status(200).json({
+    //                 status: "success",
+    //                 message: `${score.deletedCount} scores were deleted successfully!`
+    //             });
+    //         })
+    //         .catch(error => {
+    //             res.status(500).json({
+    //                 status: "fail",
+    //                 message: error.message || "Some error occurred while deleting all scores data"
+    //             });
+    //         });
+    // },
 }

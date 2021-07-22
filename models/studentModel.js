@@ -23,10 +23,13 @@ const studentSchema = new mongoose.Schema({
         type: String,
         required: true  
     },
-    semester: [{
+    currentSchoolYear: {
+        type: String,  
+    },
+    semester: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Semester'
-    }],
+    },
     
 }, { timestamp: true });
 

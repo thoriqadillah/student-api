@@ -18,10 +18,10 @@ const teacherSchema = new mongoose.Schema({
         min: 11,
         max: 12
     },
-    course: [{
+    course: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Subject'
-    }], 
+    }, 
 });
 
 teacherSchema.index({ nip: 1, name: 1, email: 1 });

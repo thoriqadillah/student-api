@@ -1,8 +1,5 @@
 const mongoose = require('mongoose');
 
-const Score = require('./scoreModel');
-const Teacher = require('./teacherModel');
-
 const courseSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -16,22 +13,22 @@ const courseSchema = new mongoose.Schema({
     grade: {
         type: String,
     },
-    semester: [{
+    semester: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Semester'
-    }],
-    student: [{
+    },
+    student: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }],
-    score: [{
+    },
+    score: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Score'
-    }],
-    teacher: [{
+    },
+    teacher: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Teacher'
-    }]
+    }
 });
 
 const Course = mongoose.model('Course', courseSchema);

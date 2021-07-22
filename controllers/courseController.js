@@ -9,9 +9,9 @@ module.exports = {
     getAllCourse: (req, res) => {
         Course.find({})
             .then(course => {
-                if (!course) {
+                if (!course.length) { //jika data kosong
                     res.status(404).json({
-                        status: "success",
+                        status: "fail",
                         message: "There is no course data to be found",
                     })
                 } else {
@@ -30,11 +30,19 @@ module.exports = {
     },
 
     searchCourse: (req, res) => {
+        //jika req.body kosong
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to insert can not be empty!"
+            });
+        }
+        
         Course.find(req.body)
             .then(course => {
-                if (!course) {
+                if (!course.length) { //jika data kosong
                     res.status(404).json({
-                        status: "success",
+                        status: "fail",
                         message: "Course data not found"
                     }); 
                 } else {
@@ -53,8 +61,17 @@ module.exports = {
     },
 
     addCourse: (req, res) => {
-        const { name, weight } = req.body;
+        //jika req.body kosong
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to insert can not be empty!"
+            });
+        }
 
+        const { name, weight } = req.body;
+ 
+        //jika salah satu filed pada req.body kosong
         if (!name) return res.status(400).json({ status: "fail", message: "Name of the course is required!" });
         if (!weight) return res.status(400).json({ status: "fail", message: "Course weight is required!" });
 
@@ -74,44 +91,47 @@ module.exports = {
             })
     },
 
-    assignSemesterToCourse: (req, res) => {
+    assignNewSemesterToCourse: (req, res) => {
         
     },
 
-    assignStudentToCourse: (req, res) => {
+    assignNewStudentToCourse: (req, res) => {
         
     },
 
-    assignScoreToCourse: (req, res) => {
+    assignNewScoreToCourse: (req, res) => {
         
     },
 
-    assignTeacherToCourse: (req, res) => {
+    assignNewTeacherToCourse: (req, res) => {
         
     },
 
     editCourse: (req, res) => {
-        if (!req.body) {
+        //jika req.body kosong
+        if (Object.keys(req.body).length === 0) {
             return res.status(400).json({
                 status: "fail",
                 message: "Data to update can not be empty!"
             });
         }
-
+        
         const { _id } = req.params;
         
         Course.findByIdAndUpdate(_id, req.body, { useFindAndModify: false })
-            .then(course => {
-                if (!course) {
+            .then(async course => {
+                const updatedData = await Course.findById({ _id });
+
+                if (!course.length) { //jika data kosong
                     res.status(404).json({
                         status: "fail",
-                        message: `Cannot update course with id ${_id}. Course was not found`
+                        message: `Cannot update course data with id ${_id}. Course data was not found`
                     });
                 } else {
                     res.status(200).json({
                         status: "success",
                         message: "Course data was updated successfully",
-                        course
+                        course: updatedData //tampilkan data yang sudah diupdate
                     });
                 }
             })
@@ -128,7 +148,7 @@ module.exports = {
 
         Course.findByIdAndDelete({ _id })
             .then(course => {
-                if (!course) {
+                if (!course.length) { //jika data kosong
                     res.status(404).json({
                         status: "fail",
                         message: `Cannot delete course data with id = ${id}. Course data was not found!`
@@ -148,19 +168,19 @@ module.exports = {
             })
     },
 
-    deleteAllCourse: (req, res) => {
-        Course.deleteMany({})
-            .then(course => {
-                res.status(200).json({
-                    status: "success",
-                    message: `${course.deletedCount} courses were deleted successfully!`
-                });
-            })
-            .catch(error => {
-                res.status(500).json({
-                    status: "fail",
-                    message: error.message || "Some error occurred while deleting all courses data"
-                });
-            });
-    },
+    // deleteAllCourse: (req, res) => {
+    //     Course.deleteMany({})
+    //         .then(course => {
+    //             res.status(200).json({
+    //                 status: "success",
+    //                 message: `${course.deletedCount} courses were deleted successfully!`
+    //             });
+    //         })
+    //         .catch(error => {
+    //             res.status(500).json({
+    //                 status: "fail",
+    //                 message: error.message || "Some error occurred while deleting all courses data"
+    //             });
+    //         });
+    // },
 }

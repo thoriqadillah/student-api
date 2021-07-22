@@ -11,6 +11,6 @@ router.patch('/:_id', studentController.editStudent);
 
 router.delete('/:_id', studentController.deleteOneStudent);
 
-router.delete('/', studentController.deleteAllStudent);
+// router.delete('/', studentController.deleteAllStudent);
 
 module.exports = router;
