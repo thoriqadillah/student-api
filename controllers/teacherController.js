@@ -1,5 +1,6 @@
 const Teacher = require('../models/teacherModel');
 const Course = require('../models/courseModel');
+const mongoose = require('mongoose');
 
 module.exports = {
     
@@ -40,7 +41,7 @@ module.exports = {
                 if (!teacher.length) { //jika data kosong
                     res.status(404).json({
                         status: "fail",
-                        message: "Teacher data not found"
+                        message: "Teacher data was not found"
                     }); 
                 } else {
                     res.status(200).json({
@@ -57,7 +58,7 @@ module.exports = {
             });
     },
 
-    addTeacher: (req, res) => {
+    addTeacher: async (req, res) => {
         //jika req.body kosong
         if (Object.keys(req.body).length === 0) {
             return res.status(400).json({
@@ -73,24 +74,49 @@ module.exports = {
         if (!name) return res.status(400).json({ status: "fail", message: "Teacher name is required!" });
         if (!email) return res.status(400).json({ status: "fail", message: "Teacher email is required!" });
 
-        Teacher.create(req.body)
-            .then(teacher => {
-                res.status(201).json({
-                    status: "success",
-                    message: "Teacher data was added successfully",
-                    teacher
-                });
-            })
-            .catch(error => {
-                res.status(500).json({
+        try {
+            const teacherNIM = await Teacher.exists({ nip });
+            const teacherEmail = await Teacher.exists({ email });
+
+            if (teacherNIM) {
+                return res.status(400).json({
                     status: "fail",
-                    message: error.message || "Some error occurred while adding teacher data."
+                    message: `Teacher with NIP ${nip} is already existed`,
                 });
-            })
+            }
+
+            if (teacherEmail) {
+                return res.status(400).json({
+                    status: "fail",
+                    message: `Teacher with email ${email} is already existed`,
+                });
+            }
+            
+            await Teacher.create(req.body, (err, data) => {
+                return res.status(201).json({
+                    status: "success",
+                    message: "Teacher was added successfully",
+                    student: data
+                });
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while adding student data"
+            });
+        }
     },
 
-    assignNewCourseToTeacher: (req, res) => {
+    assignNewCourseToTeacher: async (req, res) => {
         const { _id } = req.params; //teacher id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
         
         //jika req.body kosong
         if (Object.keys(req.body).length === 0) {
@@ -99,46 +125,51 @@ module.exports = {
                 message: "Data to update can not be empty!"
             });
         }
-        Course.findOne(req.body)
-            .then(course => {
-                if (!course.length) { //jika data kosong
-                    return res.status(404).json({
-                        status: "fail",
-                        message: `Course data was not found`
-                    });   
-                }
-                //jika data tidak kosong, maka ref dari semester dimasukkan ke dalam filed semester pada document student
-                return Teacher.findByIdAndUpdate(_id, { $push: { course: course._id } }, { new: true, useFindAndModify: false })
-                    .then(teacher => {
-                        if (!teacher.length) { //jika data kosong
-                            res.status(404).json({
-                                status: "fail",
-                                message: `Cannot update teacher data with id = ${_id}. Teacher data was not found`
-                            });    
-                        } else {
-                            res.status(200).json({
-                                status: "success",
-                                message: "Teacher data was updated successfully",
-                                teacher
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        res.status(500).json({
-                            status: "fail",
-                            message: error.message || "Some error occurred while updating teacher data."
-                        });
-                    })
-            })
-            .catch(error => {
-                res.status(500).json({
+
+        try {
+            const teacher = await Teacher.findById({ _id });
+            const course = await Course.findOne(req.body);
+
+            if (!teacher) {
+                return res.status(404).json({
                     status: "fail",
-                    message: error.message || "Some error occurred while updating student data."
-                });
-            })
+                    message: `Teacher data was not found`
+                }); 
+            }
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                }); 
+            }
+
+            await Teacher.updateOne({ _id }, { $push: { course: course._id } }, { new: true, useFindAndModify: false });
+            const populatedTeacher = await Teacher.findById({ _id }).populate('course');
+
+            return res.status(200).json({
+                status: "success",
+                message: "Teacher data was updated successfully",
+                teacher: populatedTeacher
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating teacher data."
+            });
+        }
     },
 
     editTeacher: (req, res) => {
+        const { _id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+
         //jika req.body kosong
         if (Object.keys(req.body).length === 0) {
             return res.status(400).json({
@@ -147,13 +178,11 @@ module.exports = {
             });
         }
         
-        const { _id } = req.params;
-        
-        Teacher.findByIdAndUpdate(_id, req.body, { useFindAndModify: false })
+        Teacher.findByIdAndUpdate({ _id }, req.body, { useFindAndModify: false })
             .then(async teacher => {
                 const updatedData = await Teacher.findById({ _id });
                 
-                if (!teacher.length) { //jika data kosong
+                if (!teacher) { //jika data kosong
                     res.status(404).json({
                         status: "fail",
                         message: `Cannot update teacher data with id ${_id}. Teacher data was not found`
@@ -174,44 +203,41 @@ module.exports = {
             });
     },
 
-    deleteOneTeacher: (req, res) => {
+    deleteOneTeacher: async (req, res) => {
         const { _id } = req.params;
 
-        Teacher.findByIdAndDelete({ _id })
-            .then(teacher => {
-                if (!teacher.length) { //jika data kosong
-                    res.status(404).json({
-                        status: "fail",
-                        message: `Cannot delete teacher data with id = ${id}. Teacher data was not found!`
-                    });
-                } else {
-                    res.status(200).json({
-                        status: "success",
-                        message: "Teacher data was deleted successfully!"
-                    });
-                }
-            })
-            .catch(error => {
-                res.status(500).json({
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+
+        try {
+            const teacher = await Teacher.findById({ _id });
+
+            if (!teacher) {
+                return res.status(404).json({
                     status: "fail",
-                    message: error.message || "Some error occurred while deleting teacher data"
-                });
-            })
+                    message: `Cannot delete teacher data with id ${_id}. Teacher data was not found`
+                });            
+            }
+
+            await Course.updateMany({}, { $pull: { teacher: teacher._id } }, { new: true, useFindAndModify: false })
+            student.remove();
+
+            return res.status(200).json({
+                status: "success",
+                message: "Student data was deleted successfully",
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while deleting student data."
+            });
+        }
+        
     },
 
-    // deleteAllTeacher: (req, res) => {
-    //     Teacher.deleteMany({})
-    //         .then(teacher => {
-    //             res.status(200).json({
-    //                 status: "success",
-    //                 message: `${teacher.deletedCount} teachers were deleted successfully!`
-    //             });
-    //         })
-    //         .catch(error => {
-    //             res.status(500).json({
-    //                 status: "fail",
-    //                 message: error.message || "Some error occurred while deleting all teachers data"
-    //             });
-    //         });
-    // },
+    
 }

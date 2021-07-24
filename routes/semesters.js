@@ -11,6 +11,6 @@ router.patch('/:_id', semesterController.editSemester);
 
 router.delete('/:_id', semesterController.deleteOneSemester);
 
-// router.delete('/', semesterController.deleteAllSemester);
+
 
 module.exports = router;

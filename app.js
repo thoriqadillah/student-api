@@ -42,6 +42,12 @@ app.use('/semesters/search', semesterSearchRouter);
 const studentToSemester = require('./routes/assign/studentToSemester');
 app.use('/semesters/assign/student', studentToSemester);
 
+const unasignStudent = require('./routes/unasign/semesterUnasignStudent');
+app.use('/semesters/unassign/student', unasignStudent);
+
+const unasignCourse = require('./routes/unasign/semesterUnasignCourse');
+app.use('/semesters/unassign/course', unasignCourse);
+
 
 //course router=============================================
 const courseRouter = require('./routes/courses');

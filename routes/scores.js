@@ -11,6 +11,4 @@ router.patch('/:_id', scoreController.editScore);
 
 router.delete('/:_id', scoreController.deleteOneScore);
 
-// router.delete('/', scoreController.deleteAllScore);
-
 module.exports = router;

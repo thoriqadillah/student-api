@@ -3,6 +3,7 @@ const Teacher = require('../models/teacherModel');
 const Score = require('../models/scoreModel');
 const Course = require('../models/courseModel');
 const Semester = require('../models/semesterModel');
+const mongoose = require('mongoose');
 
 module.exports = {
     
@@ -60,7 +61,7 @@ module.exports = {
             });
     },
 
-    addCourse: (req, res) => {
+    addCourse: async (req, res) => {
         //jika req.body kosong
         if (Object.keys(req.body).length === 0) {
             return res.status(400).json({
@@ -75,20 +76,30 @@ module.exports = {
         if (!name) return res.status(400).json({ status: "fail", message: "Name of the course is required!" });
         if (!weight) return res.status(400).json({ status: "fail", message: "Course weight is required!" });
 
-        Course.create(req.body)
-            .then(course => {
-                res.status(201).json({
-                    status: "success",
-                    message: "Course data was added successfully",
-                    course
-                });
-            })
-            .catch(error => {
-                res.status(500).json({
+        try {
+            const course = await Course.exists({ name })
+
+            if (course) {
+                return res.status(400).json({
                     status: "fail",
-                    message: error.message || "Some error occurred while adding course data."
+                    message: `${name} is already exist`,
                 });
-            })
+            }
+            
+            await Course.create(req.body, (err, data) => {
+                return res.status(201).json({
+                    status: "success",
+                    message: `${name} was added successfully`,
+                    course: data
+                });
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while adding teacher data"
+            });
+        }
     },
 
     assignNewSemesterToCourse: (req, res) => {
@@ -108,6 +119,15 @@ module.exports = {
     },
 
     editCourse: (req, res) => {
+        const { _id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+
         //jika req.body kosong
         if (Object.keys(req.body).length === 0) {
             return res.status(400).json({
@@ -115,8 +135,6 @@ module.exports = {
                 message: "Data to update can not be empty!"
             });
         }
-        
-        const { _id } = req.params;
         
         Course.findByIdAndUpdate(_id, req.body, { useFindAndModify: false })
             .then(async course => {
@@ -146,41 +164,11 @@ module.exports = {
     deleteOneCourse: (req, res) => {
         const { _id } = req.params;
 
-        Course.findByIdAndDelete({ _id })
-            .then(course => {
-                if (!course.length) { //jika data kosong
-                    res.status(404).json({
-                        status: "fail",
-                        message: `Cannot delete course data with id = ${id}. Course data was not found!`
-                    });
-                } else {
-                    res.status(200).json({
-                        status: "success",
-                        message: "Course data was deleted successfully!"
-                    });
-                }
-            })
-            .catch(error => {
-                res.status(500).json({
-                    status: "fail",
-                    message: error.message || "Some error occurred while deleting course data"
-                });
-            })
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
     },
-
-    // deleteAllCourse: (req, res) => {
-    //     Course.deleteMany({})
-    //         .then(course => {
-    //             res.status(200).json({
-    //                 status: "success",
-    //                 message: `${course.deletedCount} courses were deleted successfully!`
-    //             });
-    //         })
-    //         .catch(error => {
-    //             res.status(500).json({
-    //                 status: "fail",
-    //                 message: error.message || "Some error occurred while deleting all courses data"
-    //             });
-    //         });
-    // },
 }

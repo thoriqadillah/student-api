@@ -1,6 +1,7 @@
 const Student = require('../models/studentModel');
 const Course = require('../models/courseModel');
 const Semester = require('../models/semesterModel');
+const mongoose = require('mongoose');
 
 module.exports = {
     
@@ -86,8 +87,15 @@ module.exports = {
             })
     },
 
-    assignNewStudentToSemester: async (req, res) => {
+    assignNewStudent: async (req, res) => {
         const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
     
         if (Object.keys(req.body).length === 0) {
             return res.status(400).json({
@@ -96,46 +104,93 @@ module.exports = {
             });
         }
 
-        Student.findOne(req.body)
-            .then(student => {
-                if (!student.length) {
-                    return res.status(404).json({
-                        status: "fail",
-                        message: `Student data was not found`
-                    });   
-                }
-                return Semester.findByIdAndUpdate(_id, { $push: { student: student._id } }, { new: true, useFindAndModify: false })
-                    .then(semester => {
-                        if (!semester.length) {
-                            res.status(404).json({
-                                status: "fail",
-                                message: `Cannot update semester data with id ${_id}. Semester was not found`
-                            });    
-                        } else {
-                            res.status(200).json({
-                                status: "success",
-                                message: "Semester data was updated successfully",
-                                semester
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        res.status(500).json({
-                            status: "fail",
-                            message: error.message || "Some error occurred while updating semester data."
-                        });
-                    })
-            })
-            .catch(error => {
-                res.status(500).json({
+        try {
+            const semester = await Semester.findById({ _id });
+            const student = await Student.findOne(req.body);
+
+            if (!semester) {
+                return res.status(404).json({
                     status: "fail",
-                    message: error.message || "Some error occurred while updating student data."
-                });
-            })
+                    message: `Semester data was not found`
+                }); 
+            }
+
+            if (!student) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Student data was not found`
+                }); 
+            }
+
+            await Semester.updateOne({ _id }, { $push: { student: student._id } }, { new: true, useFindAndModify: false })
+            const populatedSemester = await Semester.findById({ _id }).populate('student');
+
+            return res.status(200).json({
+                status: "success",
+                message: `Student with NIM ${student.nim} have been assigned to semester data`,
+                semester: populatedSemester
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating semester data."
+            });
+        }    
     },
 
-    assignNewCourseToSemester: async (req, res) => {
+    unasignStudent: async (req, res) => {
+        const { _id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+
+        try {
+            const semester = await Semester.findById({ _id });
+            const student = await Student.findOne(req.body);
+            
+            if (!semester) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Cannot unasign semester data with id ${_id}. Semester data was not found`
+                });            
+            }
+
+            if (!student) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Student data was not found`
+                });            
+            }
+            
+            await Semester.updateOne({ _id }, { $pull: { student: student._id } }, { new: true, useFindAndModify: false });
+            const updatedSemester = await Semester.findById({ _id });
+            
+            return res.status(200).json({
+                status: "success",
+                message: `Student with NIM ${student.nim} have been unassigned`,
+                semester: updatedSemester
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating semester data."
+            });
+        }
+    },
+    
+    assignNewCourse: async (req, res) => {
         const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
     
         if (Object.keys(req.body).length === 0) {
             return res.status(400).json({
@@ -144,45 +199,94 @@ module.exports = {
             });
         }
 
-        Course.findOne(req.body)
-            .then(course => {
-                if (!course.length) {
-                    return res.status(404).json({
-                        status: "fail",
-                        message: `Course data was not found`
-                    });   
-                }
-                return Semester.findByIdAndUpdate(_id, { $push: { course: course._id } }, { new: true, useFindAndModify: false })
-                    .then(semester => {
-                        if (!semester.length) {
-                            res.status(404).json({
-                                status: "fail",
-                                message: `Cannot update semester data with id ${_id}. Semester data was not found`
-                            });    
-                        } else {
-                            res.status(200).json({
-                                status: "success",
-                                message: "Semester data was updated successfully",
-                                semester
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        res.status(500).json({
-                            status: "fail",
-                            message: error.message || "Some error occurred while updating semester data."
-                        });
-                    })
-            })
-            .catch(error => {
-                res.status(500).json({
+        try {
+            const semester = await Semester.findById({ _id });
+            const course = await Course.findOne(req.body);
+
+            if (!semester) {
+                return res.status(404).json({
                     status: "fail",
-                    message: error.message || "Some error occurred while updating student data."
-                });
-            })
+                    message: `Semester data was not found`
+                }); 
+            }
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                }); 
+            }
+
+            await Semester.updateOne({ _id }, { $push: { course: course._id } }, { new: true, useFindAndModify: false })
+            const populatedSemester = await Semester.findById({ _id }).populate('course');
+
+            return res.status(200).json({
+                status: "success",
+                message: `${course.name} have been assigned to semester data`,
+                semester: populatedSemester
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating semester data."
+            });
+        }    
+    },
+    
+    unasignCourse: async (req, res) => {
+        const { _id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+
+        try {
+            const semester = await Semester.findById({ _id });
+            const course = await Course.findOne(req.body);
+            
+            if (!semester) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Cannot unasign semester data with id ${_id}. Semester data was not found`
+                });            
+            }
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `course data was not found`
+                });            
+            }
+            
+            await Semester.updateOne({ _id }, { $pull: { course: course._id } }, { new: true, useFindAndModify: false });
+            const updatedSemester = await Semester.findById({ _id });
+            
+            return res.status(200).json({
+                status: "success",
+                message: `${course.name} have been unassigned`,
+                semester: updatedSemester
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating semester data."
+            });
+        }
     },
 
     editSemester: (req, res) => {
+        const { _id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+
         if (Object.keys(req.body).length === 0) {
             return res.status(400).json({
                 status: "fail",
@@ -190,13 +294,11 @@ module.exports = {
             });
         }
 
-        const { _id } = req.params;
-        
-        Semester.findByIdAndUpdate(_id, req.body, { useFindAndModify: false })
+        Semester.findByIdAndUpdate({_id }, req.body, { useFindAndModify: false })
             .then(async semester => {
                 const updatedData = await Semester.findById({ _id });
                 
-                if (!semester.length) {
+                if (!semester) {
                     res.status(404).json({
                         status: "fail",
                         message: `Cannot update semester with id ${_id}. Semester data was not found`
@@ -219,49 +321,36 @@ module.exports = {
 
     deleteOneSemester: async (req, res) => {
         const { _id } = req.params;
-        
-        const semester = await Semester.findById({ _id });
-        await Semester.exists({ _id }, async (err, data) => {
-            if (data) {
-                if (err) {
-                    return res.status(500).json({
-                        status: "fail",
-                        message: error.message || "Some error occurred while deleting semester data"
-                    });   
-                }
 
-                //menghapus ref student dari semester setelah student dihapus
-                await Student.updateMany({ '_id': semester.student }, { $pull: { student: semester._id } }, { new: true, useFindAndModify: false });
-                await Course.updateMany({ '_id': semester.course }, { $pull: { course: semester._id } }, { new: true, useFindAndModify: false });
-                await semester.remove();
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
 
-                return res.status(200).json({
-                    status: "success",
-                    message: `Semester data with _id = ${semester._id} was deleted successfully`,
-                });
+        try {
+            const semester = await Semester.findById({ _id });
 
-            } else {
+            if (!semester) {
                 return res.status(404).json({
                     status: "fail",
-                    message: `Cannot update semester with id ${_id}. Semester data was not found`
-                });
+                    message: `Cannot delete semester data with id ${_id}. Semester data was not found`
+                });            
             }
-        });
-    },
 
-    // deleteAllSemester: (req, res) => {
-    //     Semester.deleteMany({})
-    //         .then(semester => {
-    //             res.status(200).json({
-    //                 status: "success",
-    //                 message: `${semester.deletedCount} semesters were deleted successfully!`
-    //             });
-    //         })
-    //         .catch(error => {
-    //             res.status(500).json({
-    //                 status: "fail",
-    //                 message: error.message || "Some error occurred while deleting all semesters data"
-    //             });
-    //         });
-    // },
+            await Student.updateMany({}, { $pull: { semester: semester._id } }, { new: true, useFindAndModify: false })
+            semester.remove();
+
+            return res.status(200).json({
+                status: "success",
+                message: "Semester data was deleted successfully",
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while deleting semester data."
+            });
+        }
+    },
 }

@@ -19,7 +19,7 @@ const courseSchema = new mongoose.Schema({
     },
     student: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'Student'
     },
     score: {
         type: mongoose.Schema.Types.ObjectId,
