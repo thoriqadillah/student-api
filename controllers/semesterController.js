@@ -28,6 +28,38 @@ module.exports = {
             })
     },
 
+    getSemesterById: (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+
+        try {
+            const semester = Semester.findById({ _id });
+
+            if (!semester) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: "Semester data not found"
+                }); 
+            }
+
+            return res.status(200).json({
+                status: "success",
+                semester
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Error retrieving semester data"
+            });
+        }
+    },
+
     searchSemester: (req, res) => {
         if (Object.keys(req.body).length === 0) {
             return res.status(400).json({
