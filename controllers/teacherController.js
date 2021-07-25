@@ -27,6 +27,38 @@ module.exports = {
             })
     },
 
+    getTeacherById: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+
+        try {
+            const teacher = Teacher.findById({ _id });
+
+            if (!teacher) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: "Teacher data not found"
+                }); 
+            }
+
+            return res.status(200).json({
+                status: "success",
+                teacher
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Error retrieving teacher data"
+            });
+        }
+    },
+
     searchTeacher: (req, res) => {
         //jika req.body kosong
         if (Object.keys(req.body).length === 0) {
@@ -108,7 +140,7 @@ module.exports = {
         }
     },
 
-    assignNewCourseToTeacher: async (req, res) => {
+    assignNewCourse: async (req, res) => {
         const { _id } = req.params; //teacher id
 
         if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
@@ -145,15 +177,59 @@ module.exports = {
             }
 
             await Teacher.updateOne({ _id }, { $push: { course: course._id } }, { new: true, useFindAndModify: false });
-            const populatedTeacher = await Teacher.findById({ _id }).populate('course');
+            const updatedTeacher = await Teacher.findById({ _id });
 
             return res.status(200).json({
                 status: "success",
-                message: "Teacher data was updated successfully",
-                teacher: populatedTeacher
+                message: `${course.name} has been assigned to teacher data`,
+                teacher: updatedTeacher
             });
         } catch (error) {
             res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating teacher data."
+            });
+        }
+    },
+
+    unassignCourse: async (req, res) => {
+        const { _id } = req.params; //teacher id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+
+        try {
+            const teacher = await Teacher.findById({ _id });
+            const course = await Course.findOne(req.body);
+            
+            if (!teacher) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Cannot unassign course in teacher data with id ${_id}. Teacher data was not found`
+                });            
+            }
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                });            
+            }
+            
+            await Teacher.updateOne({ _id }, { $pull: { course: course._id } }, { new: true, useFindAndModify: false });
+            const updatedTeacher = await Teacher.findById({ _id });
+            
+            return res.status(200).json({
+                status: "success",
+                message: `${course.name} has been unassigned from teacher data`,
+                teacher: updatedTeacher
+            });
+        } catch (error) {
+            return res.status(500).json({
                 status: "fail",
                 message: error.message || "Some error occurred while updating teacher data."
             });
@@ -223,9 +299,7 @@ module.exports = {
                 });            
             }
 
-            await Course.updateMany({}, { $pull: { teacher: teacher._id } }, { new: true, useFindAndModify: false })
             student.remove();
-
             return res.status(200).json({
                 status: "success",
                 message: "Student data was deleted successfully",
@@ -239,5 +313,27 @@ module.exports = {
         
     },
 
-    
+    deleteAllTeacher: async (req, res) => {
+        try {
+            const teacher = Teacher.find({});
+
+            if (!teacher) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: "There is no teacher data to be found"
+                });               
+            }
+
+            await Teacher.deleteMany({});
+            return res.status(200).json({
+                status: "success",
+                message: "All teacher data was deleted successfully",
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while deleting all teacher data."
+            });
+        }
+    }
 }

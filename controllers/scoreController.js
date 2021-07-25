@@ -27,6 +27,38 @@ module.exports = {
             })
     },
 
+    getScoreById: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+
+        try {
+            const score = Score.findById({ _id });
+
+            if (!score) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: "Score data not found"
+                }); 
+            }
+
+            return res.status(200).json({
+                status: "success",
+                score
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Error retrieving score data"
+            });
+        }
+    },
+
     searchScore: (req, res) => {
         //jika req.body kosong
         if (Object.keys(req.body).length === 0) {
@@ -88,8 +120,108 @@ module.exports = {
             })
     },
 
-    assignNewCourseToScore: (req, res) => {
+    assignNewCourse: async (req, res) => {
+        const { _id } = req.params; //student id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
         
+        //jika req.body kosong
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const score = await Score.findById({ _id });
+            const course = await Course.findOne(req.body);
+
+            if (!score) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Score data was not found`
+                }); 
+            }
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                }); 
+            }
+
+            await Score.updateOne({ _id }, { $push: { course: course._id } }, { new: true, useFindAndModify: false });
+            const updatedScore = await Score.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `${course.name} has been assigned to score data`,
+                score: updatedScore
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating score data."
+            });
+        }
+    },
+
+    unassignCourse: async (req, res) => {
+        const { _id } = req.params; //student id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+        
+        //jika req.body kosong
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const score = await Score.findById({ _id });
+            const course = await Course.findOne(req.body);
+
+            if (!score) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Score data was not found`
+                }); 
+            }
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                }); 
+            }
+
+            await Score.updateOne({ _id }, { $pull: { course: course._id } }, { new: true, useFindAndModify: false });
+            const updatedScore = await Score.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `${course.name} has been unassigned to score data`,
+                score: updatedScore
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating score data."
+            });
+        }
     },
 
     editScore: (req, res) => {
@@ -135,7 +267,7 @@ module.exports = {
             });
     },
 
-    deleteOneScore: (req, res) => {
+    deleteOneScore: async  (req, res) => {
         const { _id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
@@ -144,5 +276,51 @@ module.exports = {
                 message: "Id is not valid"
             });           
         }
+
+        try {
+            const score = await Score.findById({ _id });
+            
+            if (!score) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Cannot delete score data with id ${_id}. Score data was not found`
+                });            
+            }
+
+            score.remove();
+            return res.status(200).json({
+                status: "success",
+                message: "Score data was deleted successfully",
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while deleting score data."
+            });
+        }
     },
+
+    deleteAllScore: async (req, res) => {
+        try {
+            const score = Score.find({});
+
+            if (!score) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: "There is no score data to be found"
+                });               
+            }
+
+            await Score.deleteMany({});
+            return res.status(200).json({
+                status: "success",
+                message: "All score data was deleted successfully",
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while deleting all score data."
+            });
+        }
+    }
 }

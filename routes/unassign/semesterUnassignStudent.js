@@ -3,6 +3,6 @@ const router = express.Router();
 
 const semesterController = require("../../controllers/semesterController");
 
-router.patch('/:_id', semesterController.unasignCourse);
+router.patch('/:_id', semesterController.unassignStudent);
 
 module.exports = router;

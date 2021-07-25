@@ -28,7 +28,7 @@ module.exports = {
             })
     },
 
-    getSemesterById: (req, res) => {
+    getSemesterById: async (req, res) => {
         const { _id } = req.params; //semester id
 
         if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
@@ -155,12 +155,12 @@ module.exports = {
             }
 
             await Semester.updateOne({ _id }, { $push: { student: student._id } }, { new: true, useFindAndModify: false })
-            const populatedSemester = await Semester.findById({ _id }).populate('student');
+            const updatedSemester = await Semester.findById({ _id });
 
             return res.status(200).json({
                 status: "success",
-                message: `Student with NIM ${student.nim} have been assigned to semester data`,
-                semester: populatedSemester
+                message: `Student with NIM ${student.nim} has been assigned to semester data`,
+                semester: updatedSemester
             });
         } catch (error) {
             res.status(500).json({
@@ -170,14 +170,22 @@ module.exports = {
         }    
     },
 
-    unasignStudent: async (req, res) => {
-        const { _id } = req.params;
+    unassignStudent: async (req, res) => {
+        const { _id } = req.params; //semester
 
         if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
             return res.status(400).json({
                 status: "fail",
                 message: "Id is not valid"
             });           
+        }
+
+        //jika req.body kosong
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
         }
 
         try {
@@ -187,7 +195,7 @@ module.exports = {
             if (!semester) {
                 return res.status(404).json({
                     status: "fail",
-                    message: `Cannot unasign semester data with id ${_id}. Semester data was not found`
+                    message: `Cannot unassign student in semester data with id ${_id}. Semester data was not found`
                 });            
             }
 
@@ -200,10 +208,10 @@ module.exports = {
             
             await Semester.updateOne({ _id }, { $pull: { student: student._id } }, { new: true, useFindAndModify: false });
             const updatedSemester = await Semester.findById({ _id });
-            
+
             return res.status(200).json({
                 status: "success",
-                message: `Student with NIM ${student.nim} have been unassigned`,
+                message: `Student with NIM ${student.nim} has been unassigned from semester data`,
                 semester: updatedSemester
             });
         } catch (error) {
@@ -250,12 +258,12 @@ module.exports = {
             }
 
             await Semester.updateOne({ _id }, { $push: { course: course._id } }, { new: true, useFindAndModify: false })
-            const populatedSemester = await Semester.findById({ _id }).populate('course');
+            const updatedSemester = await Semester.findById({ _id });
 
             return res.status(200).json({
                 status: "success",
-                message: `${course.name} have been assigned to semester data`,
-                semester: populatedSemester
+                message: `${course.name} has been assigned to semester data`,
+                semester: updatedSemester
             });
         } catch (error) {
             res.status(500).json({
@@ -265,14 +273,22 @@ module.exports = {
         }    
     },
     
-    unasignCourse: async (req, res) => {
-        const { _id } = req.params;
+    unassignCourse: async (req, res) => {
+        const { _id } = req.params; //semester id
 
         if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
             return res.status(400).json({
                 status: "fail",
                 message: "Id is not valid"
             });           
+        }
+
+        //jika req.body kosong
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
         }
 
         try {
@@ -282,14 +298,14 @@ module.exports = {
             if (!semester) {
                 return res.status(404).json({
                     status: "fail",
-                    message: `Cannot unasign semester data with id ${_id}. Semester data was not found`
+                    message: `Cannot unassign course in semester data with id ${_id}. Semester data was not found`
                 });            
             }
 
             if (!course) {
                 return res.status(404).json({
                     status: "fail",
-                    message: `course data was not found`
+                    message: `Course data was not found`
                 });            
             }
             
@@ -298,7 +314,7 @@ module.exports = {
             
             return res.status(200).json({
                 status: "success",
-                message: `${course.name} have been unassigned`,
+                message: `${course.name} has been unassigned from semester data`,
                 semester: updatedSemester
             });
         } catch (error) {
@@ -371,9 +387,7 @@ module.exports = {
                 });            
             }
 
-            await Student.updateMany({}, { $pull: { semester: semester._id } }, { new: true, useFindAndModify: false })
             semester.remove();
-
             return res.status(200).json({
                 status: "success",
                 message: "Semester data was deleted successfully",
@@ -385,4 +399,28 @@ module.exports = {
             });
         }
     },
+    
+    deleteAllSemester: async (req, res) => {
+        try {
+            const semester = Semester.find({});
+
+            if (!semester) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: "There is no semester data to be found"
+                });               
+            }
+
+            await Semester.deleteMany({});
+            return res.status(200).json({
+                status: "success",
+                message: "All semester data was deleted successfully",
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while deleting all semester data."
+            });
+        }
+    }
 }

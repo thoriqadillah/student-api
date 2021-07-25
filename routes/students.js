@@ -5,10 +5,12 @@ const studentController = require("../controllers/studentController");
 
 router.route('/')
     .get(studentController.getAllStudent)
-    .post(studentController.addStudent);
+    .post(studentController.addStudent)
+    .delete(studentController.deleteAllStudent);
 
-router.patch('/:_id', studentController.editStudent);
 
+// router.get('/:_id', studentController.getStudentById)
+router.patch('/:_id', studentController.editStudent)
 router.delete('/:_id', studentController.deleteOneStudent);
 
 module.exports = router;

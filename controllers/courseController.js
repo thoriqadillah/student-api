@@ -30,6 +30,38 @@ module.exports = {
             })
     },
 
+    getCourseById: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+
+        try {
+            const course = Course.findById({ _id });
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: "Course data not found"
+                }); 
+            }
+
+            return res.status(200).json({
+                status: "success",
+                course
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Error retrieving course data"
+            });
+        }
+    },
+
     searchCourse: (req, res) => {
         //jika req.body kosong
         if (Object.keys(req.body).length === 0) {
@@ -161,7 +193,7 @@ module.exports = {
             });
     },
 
-    deleteOneCourse: (req, res) => {
+    deleteOneCourse: async (req, res) => {
         const { _id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
@@ -170,5 +202,51 @@ module.exports = {
                 message: "Id is not valid"
             });           
         }
+
+        try {
+            const course = await Course.findById({ _id });
+            
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Cannot delete course data with id ${_id}. Course data was not found`
+                });            
+            }
+
+            course.remove();
+            return res.status(200).json({
+                status: "success",
+                message: "Course data was deleted successfully",
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while deleting course data."
+            });
+        }
     },
+
+    deleteAllCourse: async (req, res) => {
+        try {
+            const course = Course.find({});
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: "There is no course data to be found"
+                });               
+            }
+
+            await Course.deleteMany({});
+            return res.status(200).json({
+                status: "success",
+                message: "All course data was deleted successfully",
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while deleting all course data."
+            });
+        }
+    }
 }

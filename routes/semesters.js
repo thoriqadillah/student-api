@@ -5,11 +5,11 @@ const semesterController = require("../controllers/semesterController");
 
 router.route('/')
     .get(semesterController.getAllSemester)
-    .post(semesterController.addSemester);
+    .post(semesterController.addSemester)
+    .delete(semesterController.deleteAllSemester);
     
-router.route('/:_id')
-    .get(semesterController.getSemesterById)
-    .patch(semesterController.editSemester)
-    .delete(semesterController.deleteOneSemester);
+// router.get('/:_id', semesterController.getSemesterById)
+router.patch('/:_id', semesterController.editSemester)
+router.delete('/:_id', semesterController.deleteOneSemester);
 
 module.exports = router;

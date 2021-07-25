@@ -28,8 +28,11 @@ app.use('/students', studentRouter);
 const studentSearchRouter = require('./routes/search/studentSearch');
 app.use('/students/search', studentSearchRouter);
 
-const semesterToStudent = require('./routes/assign/semesterToStudent');
-app.use('/students/assign/semester', semesterToStudent);
+const assignNewSemesterInStudent = require('./routes/assign/studentAssignSemester');
+app.use('/students/assign/semester', assignNewSemesterInStudent);
+
+const unassignSemesterInStudent = require('./routes/unassign/studentUnassignSemester');
+app.use('/students/unassign/semester', unassignSemesterInStudent);
 
 
 //semester router=============================================
@@ -39,14 +42,14 @@ app.use('/semesters', semesterRouter);
 const semesterSearchRouter = require('./routes/search/semesterSearch');
 app.use('/semesters/search', semesterSearchRouter);
 
-const studentToSemester = require('./routes/assign/studentToSemester');
-app.use('/semesters/assign/student', studentToSemester);
+const assignNewStudentInSemester = require('./routes/assign/semesterAssignStudent');
+app.use('/semesters/assign/student', assignNewStudentInSemester);
 
-const unasignStudent = require('./routes/unasign/semesterUnasignStudent');
-app.use('/semesters/unassign/student', unasignStudent);
+const unassignStudentInSemester = require('./routes/unassign/semesterUnassignStudent');
+app.use('/semesters/unassign/student', unassignStudentInSemester);
 
-const unasignCourse = require('./routes/unasign/semesterUnasignCourse');
-app.use('/semesters/unassign/course', unasignCourse);
+const unassignCourseInSemester = require('./routes/unassign/semesterUnassignCourse');
+app.use('/semesters/unassign/course', unassignCourseInSemester);
 
 
 //course router=============================================
@@ -70,7 +73,13 @@ const teacherRouter = require('./routes/teachers');
 app.use('/teachers', teacherRouter);
 
 const teacherSearchRouter = require('./routes/search/teacherSearch');
-app.use('/semesters/search', teacherSearchRouter);
+app.use('/teachers/search', teacherSearchRouter);
+
+const assignNewCourseInTeacher = require('./routes/assign/teacherAssignCourse');
+app.use('/teachers/assign/course', assignNewCourseInTeacher);
+
+const unassignCourseInTeacher = require('./routes/unassign/teacherUnassignCourse');
+app.use('/teachers/assign/course', unassignCourseInTeacher);
 
 
 
