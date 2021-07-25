@@ -213,7 +213,7 @@ module.exports = {
 
             return res.status(200).json({
                 status: "success",
-                message: `${course.name} has been unassigned to score data`,
+                message: `${course.name} has been unassigned from score data`,
                 score: updatedScore
             });
         } catch (error) {

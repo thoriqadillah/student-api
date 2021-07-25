@@ -134,20 +134,414 @@ module.exports = {
         }
     },
 
-    assignNewSemesterToCourse: (req, res) => {
+    assignNewSemester: async (req, res) => {
+        const { _id } = req.params; //student id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
         
+        //jika req.body kosong
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const course = await Course.findById({ _id });
+            const semester = await Semester.findOne(req.body);
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                }); 
+            }
+
+            if (!semester) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Semester data was not found`
+                }); 
+            }
+
+            await Course.updateOne({ _id }, { $push: { semester: semester._id } }, { new: true, useFindAndModify: false });
+            const updatedCourse = await Course.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `Semester ${semester.semester} has been assigned to course data`,
+                course: updatedCourse
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating course data."
+            });
+        }
     },
 
-    assignNewStudentToCourse: (req, res) => {
+    unassignSemester: async (req, res) => {
+        const { _id } = req.params; //student id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
         
+        //jika req.body kosong
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const course = await Course.findById({ _id });
+            const semester = await Semester.findOne(req.body);
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                }); 
+            }
+
+            if (!semester) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Semester data was not found`
+                }); 
+            }
+
+            await Course.updateOne({ _id }, { $pull: { semester: semester._id } }, { new: true, useFindAndModify: false });
+            const updatedCourse = await Course.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `Semester ${semester.semester} has been unassigned from course data`,
+                course: updatedCourse
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating course data."
+            });
+        }
     },
 
-    assignNewScoreToCourse: (req, res) => {
-        
+    assignNewStudent: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+    
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const course = await Course.findById({ _id });
+            const student = await Student.findOne(req.body);
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                }); 
+            }
+
+            if (!student) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Student data was not found`
+                }); 
+            }
+
+            await Course.updateOne({ _id }, { $push: { student: student._id } }, { new: true, useFindAndModify: false })
+            const updatedCourse = await Course.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `Student with NIM ${student.nim} has been assigned to course data`,
+                Course: updatedCourse
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating course data."
+            });
+        }   
     },
 
-    assignNewTeacherToCourse: (req, res) => {
-        
+    unassignStudent: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+    
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const course = await Course.findById({ _id });
+            const student = await Student.findOne(req.body);
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                }); 
+            }
+
+            if (!student) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Student data was not found`
+                }); 
+            }
+
+            await Course.updateOne({ _id }, { $pull: { student: student._id } }, { new: true, useFindAndModify: false })
+            const updatedCourse = await Course.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `Student with NIM ${student.nim} has been unassigned from course data`,
+                Course: updatedCourse
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating course data."
+            });
+        }
+    },
+
+    assignNewScore: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+    
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const course = await Course.findById({ _id });
+            const score = await Score.findOne(req.body);
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                }); 
+            }
+
+            if (!score) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Score data was not found`
+                }); 
+            }
+
+            await Course.updateOne({ _id }, { $push: { score: score._id } }, { new: true, useFindAndModify: false })
+            const updatedCourse = await Course.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `${score.category} score category has been assigned to course data`,
+                Course: updatedCourse
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating course data."
+            });
+        }   
+    },
+
+    unassignScore: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+    
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const course = await Course.findById({ _id });
+            const score = await Score.findOne(req.body);
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                }); 
+            }
+
+            if (!score) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Score data was not found`
+                }); 
+            }
+
+            await Course.updateOne({ _id }, { $pull: { score: score._id } }, { new: true, useFindAndModify: false })
+            const updatedCourse = await Course.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `${score.category} score category has been unassigned from course data`,
+                Course: updatedCourse
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating course data."
+            });
+        }  
+    },
+
+    assignNewTeacher: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+    
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const course = await Course.findById({ _id });
+            const teacher = await Teacher.findOne(req.body);
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                }); 
+            }
+
+            if (!teacher) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Teacher data was not found`
+                }); 
+            }
+
+            await Course.updateOne({ _id }, { $push: { teacher: teacher._id } }, { new: true, useFindAndModify: false })
+            const updatedCourse = await Course.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `Teacher with NIP ${teacher.nip} has been assigned to course data`,
+                Course: updatedCourse
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating course data."
+            });
+        }   
+    },
+
+    unassignTeacher: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+    
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const course = await Course.findById({ _id });
+            const teacher = await Teacher.findOne(req.body);
+
+            if (!course) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Course data was not found`
+                }); 
+            }
+
+            if (!teacher) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Teacher data was not found`
+                }); 
+            }
+
+            await Course.updateOne({ _id }, { $pull: { teacher: teacher._id } }, { new: true, useFindAndModify: false })
+            const updatedCourse = await Course.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `Teacher with NIP ${teacher.nip} has been unassigned from course data`,
+                Course: updatedCourse
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating course data."
+            });
+        }  
     },
 
     editCourse: (req, res) => {

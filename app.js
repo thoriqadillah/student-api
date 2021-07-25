@@ -59,6 +59,31 @@ app.use('/courses', courseRouter);
 const courseSearchRouter = require('./routes/search/courseSearch');
 app.use('/courses/search', courseSearchRouter);
 
+// course un/assign score
+const assignNewScoreInCourse = require('./routes/assign/courseAssignScore');
+app.use('/courses/assign/score', assignNewScoreInCourse);
+
+const unassignScoreInCourse = require('./routes/unassign/courseUnassignScore');
+app.use('/courses/unassign/score', unassignScoreInCourse);
+// course un/assign semester
+const assignNewSemesterInCourse = require('./routes/assign/courseAssignSemester');
+app.use('/courses/assign/semester', assignNewSemesterInCourse);
+
+const unassignSemesterInCourse = require('./routes/unassign/courseUnassignSemester');
+app.use('/courses/unassign/semester', unassignSemesterInCourse);
+// course un/assign student
+const assignNewStudentInCourse = require('./routes/assign/courseAssignStudent');
+app.use('/courses/assign/student', assignNewStudentInCourse);
+
+const unassignStudentInCourse = require('./routes/unassign/courseUnassignStudent');
+app.use('/courses/unassign/student', unassignStudentInCourse);
+// course un/assign teacher
+const assignNewTeacherInCourse = require('./routes/assign/courseAssignTeacher');
+app.use('/courses/assign/teacher', assignNewTeacherInCourse);
+
+const unassignTeacherInCourse = require('./routes/unassign/courseUnassignTeacher');
+app.use('/courses/unassign/teacher', unassignTeacherInCourse);
+
 
 //score router=============================================
 const scoreRouter = require('./routes/scores');
@@ -66,6 +91,12 @@ app.use('/scores', scoreRouter);
 
 const scoreSearchRouter = require('./routes/search/scoreSearch');
 app.use('/scores/search', scoreSearchRouter);
+
+const assignNewCourseInScore = require('./routes/assign/scoreAssignCourse');
+app.use('/scores/assign/course', assignNewCourseInScore);
+
+const unassignCourseInScore = require('./routes/unassign/scoreUnassignCourse');
+app.use('/scores/unassign/course', unassignCourseInScore);
 
 
 //teacher router=============================================
@@ -79,7 +110,7 @@ const assignNewCourseInTeacher = require('./routes/assign/teacherAssignCourse');
 app.use('/teachers/assign/course', assignNewCourseInTeacher);
 
 const unassignCourseInTeacher = require('./routes/unassign/teacherUnassignCourse');
-app.use('/teachers/assign/course', unassignCourseInTeacher);
+app.use('/teachers/unassign/course', unassignCourseInTeacher);
 
 
 

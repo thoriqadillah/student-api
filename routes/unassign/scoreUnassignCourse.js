@@ -3,6 +3,6 @@ const router = express.Router();
 
 const scoreController = require("../../controllers/scoreController");
 
-router.patch('/:_id', scoreController.assignNewCourse);
+router.patch('/:_id', scoreController.unassignCourse);
 
 module.exports = router;
