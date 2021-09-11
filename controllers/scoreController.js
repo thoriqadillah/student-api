@@ -1,5 +1,5 @@
 const Score = require('../models/scoreModel');
-const Course = require('../models/courseModel');
+const StudentCourse = require('../models/studentCourseModel');
 const mongoose = require('mongoose');
 
 module.exports = {
@@ -99,10 +99,11 @@ module.exports = {
             });
         }
 
-        const { category } = req.body;
+        const { category, score } = req.body;
         
         //jika salah satu filed pada req.body kosong
         if (!category) return res.status(400).json({ status: "fail", message: "Score category is required!" });
+        if (!score) return res.status(400).json({ status: "fail", message: "Score is required!" });
 
         Score.create(req.body)
             .then(score => {
@@ -140,7 +141,7 @@ module.exports = {
 
         try {
             const score = await Score.findById({ _id });
-            const course = await Course.findOne(req.body);
+            const course = await StudentCourse.findOne(req.body);
 
             if (!score) {
                 return res.status(404).json({
@@ -192,7 +193,7 @@ module.exports = {
 
         try {
             const score = await Score.findById({ _id });
-            const course = await Course.findOne(req.body);
+            const course = await StudentCourse.findOne(req.body);
 
             if (!score) {
                 return res.status(404).json({
@@ -224,6 +225,211 @@ module.exports = {
         }
     },
 
+    assignNewStudent: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+    
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const score = await Score.findById({ _id });
+            const student = await Student.findOne(req.body);
+
+            if (!score) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Score data was not found`
+                }); 
+            }
+
+            if (!student) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Student data was not found`
+                }); 
+            }
+
+            await Score.updateOne({ _id }, { $push: { student: student._id } }, { new: true, useFindAndModify: false })
+            const updatedScore = await Score.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `Student with NIM ${student.nim} has been assigned to score data`,
+                score: updatedScore
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating score data."
+            });
+        }   
+    },
+
+    unassignStudent: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+    
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const score = await Score.findById({ _id });
+            const student = await Student.findOne(req.body);
+
+            if (!score) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Score data was not found`
+                }); 
+            }
+
+            if (!student) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Student data was not found`
+                }); 
+            }
+
+            await Score.updateOne({ _id }, { $pull: { student: student._id } }, { new: true, useFindAndModify: false })
+            const updatedScore = await Score.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `Student with NIM ${student.nim} has been unassigned from score data`,
+                score: updatedScore
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating score data."
+            });
+        }
+    },
+
+    assignNewTeacher: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+    
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const score = await Score.findById({ _id });
+            const teacher = await Teacher.findOne(req.body);
+
+            if (!score) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Score data was not found`
+                }); 
+            }
+
+            if (!teacher) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Teacher data was not found`
+                }); 
+            }
+
+            await Score.updateOne({ _id }, { $push: { teacher: teacher._id } }, { new: true, useFindAndModify: false })
+            const updatedScore = await Score.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `Teacher with NIP ${teacher.nip} has been assigned to score data`,
+                score: updatedScore
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating score data."
+            });
+        }   
+    },
+
+    unassignTeacher: async (req, res) => {
+        const { _id } = req.params; //semester id
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
+            return res.status(400).json({
+                status: "fail",
+                message: "Id is not valid"
+            });           
+        }
+    
+        if (Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Data to update can not be empty!"
+            });
+        }
+
+        try {
+            const score = await Score.findById({ _id });
+            const teacher = await Teacher.findOne(req.body);
+
+            if (!score) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Score data was not found`
+                }); 
+            }
+
+            if (!teacher) {
+                return res.status(404).json({
+                    status: "fail",
+                    message: `Teacher data was not found`
+                }); 
+            }
+
+            await Score.updateOne({ _id }, { $pull: { teacher: teacher._id } }, { new: true, useFindAndModify: false })
+            const updatedScore = await Score.findById({ _id });
+
+            return res.status(200).json({
+                status: "success",
+                message: `Teacher with NIP ${teacher.nip} has been unassigned from score data`,
+                score: updatedScore
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: "fail",
+                message: error.message || "Some error occurred while updating score data."
+            });
+        }  
+    },
+
+    
     editScore: (req, res) => {
         const { _id } = req.params;
 
