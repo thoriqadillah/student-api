@@ -1,5 +1,5 @@
 const Teacher = require('../models/teacherModel');
-const Course = require('../models/courseModel');
+const StudentCourse = require('../models/studentCourseModel');
 const mongoose = require('mongoose');
 
 module.exports = {

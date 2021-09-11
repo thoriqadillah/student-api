@@ -20,7 +20,7 @@ const teacherSchema = new mongoose.Schema({
     },
     course: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Subject'
+        ref: 'Course'
     }, 
 });
 
