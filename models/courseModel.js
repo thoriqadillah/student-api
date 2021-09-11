@@ -10,20 +10,9 @@ const courseSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    grade: {
+    semester: { //ganjil atau genap
         type: String,
-    },
-    semester: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Semester'
-    },
-    student: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Student'
-    },
-    score: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Score'
+        required: true
     },
     teacher: {
         type: mongoose.Schema.Types.ObjectId,
