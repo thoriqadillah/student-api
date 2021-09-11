@@ -1,5 +1,5 @@
 const Student = require('../models/studentModel');
-const Course = require('../models/courseModel');
+const StudentCourse = require('../models/studentCourseModel');
 const Semester = require('../models/semesterModel');
 const mongoose = require('mongoose');
 
@@ -222,109 +222,6 @@ module.exports = {
         }
     },
     
-    assignNewCourse: async (req, res) => {
-        const { _id } = req.params; //semester id
-
-        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
-            return res.status(400).json({
-                status: "fail",
-                message: "Id is not valid"
-            });           
-        }
-    
-        if (Object.keys(req.body).length === 0) {
-            return res.status(400).json({
-                status: "fail",
-                message: "Data to update can not be empty!"
-            });
-        }
-
-        try {
-            const semester = await Semester.findById({ _id });
-            const course = await Course.findOne(req.body);
-
-            if (!semester) {
-                return res.status(404).json({
-                    status: "fail",
-                    message: `Semester data was not found`
-                }); 
-            }
-
-            if (!course) {
-                return res.status(404).json({
-                    status: "fail",
-                    message: `Course data was not found`
-                }); 
-            }
-
-            await Semester.updateOne({ _id }, { $push: { course: course._id } }, { new: true, useFindAndModify: false })
-            const updatedSemester = await Semester.findById({ _id });
-
-            return res.status(200).json({
-                status: "success",
-                message: `${course.name} has been assigned to semester data`,
-                semester: updatedSemester
-            });
-        } catch (error) {
-            res.status(500).json({
-                status: "fail",
-                message: error.message || "Some error occurred while updating semester data."
-            });
-        }    
-    },
-    
-    unassignCourse: async (req, res) => {
-        const { _id } = req.params; //semester id
-
-        if (!mongoose.Types.ObjectId.isValid(_id)) { //jika _id tidak valid
-            return res.status(400).json({
-                status: "fail",
-                message: "Id is not valid"
-            });           
-        }
-
-        //jika req.body kosong
-        if (Object.keys(req.body).length === 0) {
-            return res.status(400).json({
-                status: "fail",
-                message: "Data to update can not be empty!"
-            });
-        }
-
-        try {
-            const semester = await Semester.findById({ _id });
-            const course = await Course.findOne(req.body);
-            
-            if (!semester) {
-                return res.status(404).json({
-                    status: "fail",
-                    message: `Cannot unassign course in semester data with id ${_id}. Semester data was not found`
-                });            
-            }
-
-            if (!course) {
-                return res.status(404).json({
-                    status: "fail",
-                    message: `Course data was not found`
-                });            
-            }
-            
-            await Semester.updateOne({ _id }, { $pull: { course: course._id } }, { new: true, useFindAndModify: false });
-            const updatedSemester = await Semester.findById({ _id });
-            
-            return res.status(200).json({
-                status: "success",
-                message: `${course.name} has been unassigned from semester data`,
-                semester: updatedSemester
-            });
-        } catch (error) {
-            return res.status(500).json({
-                status: "fail",
-                message: error.message || "Some error occurred while updating semester data."
-            });
-        }
-    },
-
     editSemester: (req, res) => {
         const { _id } = req.params;
 

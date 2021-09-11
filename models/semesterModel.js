@@ -14,10 +14,6 @@ const semesterSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Student'
     },
-    course: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Subject'
-    }
 });
 
 const Semester = mongoose.model('Semester', semesterSchema);
