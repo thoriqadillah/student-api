@@ -82,7 +82,7 @@ Untuk menghapus relasi suatu document dengan document yang lain dapat dilakukan 
 Contoh : <code>http://localhost/semesters/unassign/student/s8ha9dsh?nim=195150400111034</code>
 <p>&nbsp</p>
 
-# Bagaiaman API Ini Digunakan?
+# Bagaiamana API Ini Digunakan?
 Untuk memudahkan penggunaan, direkomendasikan dengan cara menambahkan data pada collection <code>Course</code> tanpa harus merelasikannya pada document yang lain pada menggunakan method <code>POST</code> untuk initial datanya pada URI :
 
 <pre><code>http://localhost/course</code></pre>
